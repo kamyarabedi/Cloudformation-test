@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Simple CloudFormation template to create one VPC, one subnet, one S3 bucket, and one EC2 instance
+
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Latest Amazon Linux 2023 AMI
+
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: SimpleVPC
+
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: SimpleSubnet
+
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      SubnetId: !Ref MySubnet
+      Tags:
+        - Key: Name
+          Value: SimpleEC2
+
+Outputs:
+  VpcId:
+    Description: ID of the created VPC
+    Value: !Ref MyVPC
+
+  SubnetId:
+    Description: ID of the created subnet
+    Value: !Ref MySubnet
+
+  S3BucketName:
+    Description: Name of the created S3 bucket
+    Value: !Ref MyS3Bucket
+
+  EC2InstanceId:
+    Description: ID of the created EC2 instance
+    Value: !Ref MyEC2Instance
